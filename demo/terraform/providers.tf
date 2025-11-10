@@ -16,3 +16,8 @@ terraform {
 provider "azurerm" {
   features {}
 }
+
+provider "databricks" {
+  host                        = azurerm_databricks_workspace.dbw.workspace_url
+  azure_workspace_resource_id = azurerm_databricks_workspace.dbw.id
+}
