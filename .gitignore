@@ -1,0 +1,44 @@
+# Local .terraform directories
+**/.terraform/*
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Terraform variable files (if they contain secrets)
+*.tfvars
+*.tfvars.json
+
+# Override files (commonly used for local settings)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform plan output
+*.plan
+*.tfplan
+
+# Sensitive provider configuration
+.terraformrc
+terraform.rc
+
+# Lock file (optional: ignore if you use automated dependency management)
+# terraform.lock.hcl
+
+# IDE / editor configs
+.vscode/
+.idea/
+.DS_Store
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
