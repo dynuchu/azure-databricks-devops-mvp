@@ -9,6 +9,6 @@ variable "prefix" {
 }
 
 variable "suffix" {
-  type = string
+  type    = string
   default = "dynuchu"
 }
