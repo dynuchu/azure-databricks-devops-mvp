@@ -12,31 +12,34 @@ LinkedIn: [linkedin.com/in/agnesbosskay](https://linkedin.com/in/agnesbosskay)
 ## 🔷 Architecture Overview
 
 ```mermaid
-graph LR
+flowchart LR
 
-  %% --- Terraform -> Azure resources ---
-  TF[Terraform apply] --> RG[Resource group]
+  %% --- Terraform creates all resources ---
+  TF([Terraform apply]) --> RG[Azure Resource Group]
   TF --> KV[Key Vault]
-  TF --> AI[Cognitive Services]
-  TF --> ADF[Data Factory]
-  TF --> STG[Storage account]
-  TF --> DBW[Databricks workspace]
+  TF --> AI[Azure AI Services (Cognitive Account)]
+  TF --> ADF[Azure Data Factory (Managed Identity)]
+  TF --> DBW[Azure Databricks Workspace]
+  TF --> STG[Storage Account]
 
-  %% --- Databricks logical parts (no special chars) ---
-  DBW --- CL[Cluster demo]
-  DBW --- NB[Notebook hello]
-  DBW --- JOB[Databricks job]
-  DBW --- SCOPE[Secret scope kv]
+  %% --- Key Vault wiring ---
+  AI -->|primary key stored| KV
+  ADF -->|has access via MI| KV
+  DBW -->|secret scope kv| KV
 
-  %% --- Secrets wiring ---
-  AI --> KV
-  SCOPE --- KV
+  %% --- Databricks logical components ---
+  subgraph DWB[Databricks workspace]
+    CL[Cluster demo-cluster]
+    NB[Notebook hello]
+    JOB[Databricks job]
+  end
 
-  %% --- Runtime paths ---
+  %% --- Runtime flow ---
   JOB --> CL
-  NB --> SCOPE
-  NB --> AI
+  CL --> NB
+  NB -->|read ai-primary-key| KV
+  NB -->|HTTP POST| AI
 
-  %% --- ADF option: KV then AI ---
-  ADF --> KV
-  ADF --> AI
+  %% --- ADF data flow ---
+  ADF -->|optional Get Secret| KV
+  ADF -->|Web Activity call| AI
