@@ -13,43 +13,50 @@ LinkedIn: [linkedin.com/in/agnesbosskay](https://linkedin.com/in/agnesbosskay)
 
 ```mermaid
 flowchart LR
-  subgraph TF["Terraform apply"]
-    TF-->RG
+
+  %% ===== Subgraphs =====
+  subgraph TFBOX["Terraform apply"]
+    TFAPPLY((apply))
   end
 
   subgraph RG["Resource Group"]
-    KV["Azure Key Vault\n(ai-primary-key)"]
-    AI["Azure Cognitive Services\n(CognitiveAccount)"]
-    ADF["Azure Data Factory\n(Managed Identity)"]
-    DBW["Azure Databricks Workspace"]
-    STG["Storage Account (demo)"]
+    KV[Azure Key Vault<br/>(ai-primary-key)]
+    AI[Azure Cognitive Services<br/>(CognitiveAccount)]
+    ADF[Azure Data Factory<br/>(Managed Identity)]
+    DBW[Azure Databricks Workspace (resource)]
+    STG[Storage Account]
   end
 
-  subgraph DBW2["Databricks Workspace"]
-    CL["Cluster (demo-cluster)"]
-    NB["Notebook: /Workspace/Shared/demo/hello"]
-    JOB["Databricks Job"]
-    SCOPE["Secret Scope: kv\n(Key-Vault-backed)"]
+  subgraph DWB["Databricks Workspace (logical)"]
+    CL[Cluster: demo-cluster]
+    NB[Notebook: /Workspace/Shared/demo/hello]
+    JOB[Databricks Job]
+    SCOPE[Secret Scope: kv<br/>(Key-Vault-backed)]
   end
 
-  RG --- DBW2
-  TF --> KV
-  TF --> AI
-  TF --> ADF
-  TF --> DBW
-  TF --> STG
-  TF -->|create| JOB
-  TF -->|upload| NB
-  TF -->|create| CL
-  TF -->|create| SCOPE
-  TF -->|set value| KV
+  %% ===== Provisioning edges by Terraform =====
+  TFAPPLY --> KV
+  TFAPPLY --> AI
+  TFAPPLY --> ADF
+  TFAPPLY --> DBW
+  TFAPPLY --> STG
+  TFAPPLY --> JOB
+  TFAPPLY --> NB
+  TFAPPLY --> CL
+  TFAPPLY --> SCOPE
 
-  AI -->|primary_access_key| KV
+  %% ===== Relation between Azure resource & Databricks logical workspace =====
+  DBW --- DWB
+
+  %% ===== Secrets wiring =====
+  AI -- "primary_access_key" --> KV
   SCOPE --- KV
 
+  %% ===== Runtime paths =====
   JOB -->|runs on| CL
-  NB -->|"dbutils.secrets.get(scope=kv, key=ai-primary-key)"| SCOPE
+  NB -->|"dbutils.secrets.get(scope=kv key=ai-primary-key)"| SCOPE
   NB -->|HTTP POST| AI
 
+  %% ===== ADF path (demo vs. clean) =====
   ADF -->|"Get Secret (AzureKeyVault activity)"| KV
-  ADF -->|"Web Activity (Header → Ocp-Apim-Subscription-Key)"| AI
+  ADF -->|"Web Activity (header → Ocp-Apim-Subscription-Key)"| AI
