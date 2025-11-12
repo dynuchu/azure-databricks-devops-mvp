@@ -9,7 +9,6 @@ Minimal reproducible demo showing:
 🛠️ Built by **Agnes Bosskay** | Cloud & DevOps Engineer  
 LinkedIn: [linkedin.com/in/agnesbosskay](https://linkedin.com/in/agnesbosskay)
 
-
 ## 🔷 Architecture Overview
 
 ```mermaid
@@ -43,14 +42,14 @@ flowchart LR
   TF -->|upload| NB
   TF -->|create| CL
   TF -->|create| SCOPE
-  TF -->|Set value| KV
+  TF -->|set value| KV
 
   AI -->|primary_access_key| KV
   SCOPE --- KV
 
   JOB -->|runs on| CL
-  NB -->|dbutils.secrets.get('kv','ai-primary-key')| SCOPE
+  NB -->|"dbutils.secrets.get(scope=kv, key=ai-primary-key)"| SCOPE
   NB -->|HTTP POST| AI
 
-  ADF -->|Get Secret\n(AzureKeyVault activity)| KV
-  ADF -->|Web Activity\nHeader: Ocp-Apim-Subscription-Key| AI
+  ADF -->|"Get Secret (AzureKeyVault activity)"| KV
+  ADF -->|"Web Activity (Header → Ocp-Apim-Subscription-Key)"| AI
