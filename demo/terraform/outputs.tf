@@ -7,3 +7,8 @@ output "adf_name" {
 output "ai_endpoint" {
   value = azurerm_cognitive_account.ai.endpoint
 }
+
+output "ai_key_secret_id" {
+  value     = azurerm_key_vault_secret.ai_primary_key.id
+  sensitive = true
+}

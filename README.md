@@ -8,3 +8,49 @@ Minimal reproducible demo showing:
 
 🛠️ Built by **Agnes Bosskay** | Cloud & DevOps Engineer  
 LinkedIn: [linkedin.com/in/agnesbosskay](https://linkedin.com/in/agnesbosskay)
+
+
+## 🔷 Architecture Overview
+
+```mermaid
+flowchart LR
+  subgraph TF["Terraform apply"]
+    TF-->RG
+  end
+
+  subgraph RG["Resource Group"]
+    KV["Azure Key Vault\n(ai-primary-key)"]
+    AI["Azure Cognitive Services\n(CognitiveAccount)"]
+    ADF["Azure Data Factory\n(Managed Identity)"]
+    DBW["Azure Databricks Workspace"]
+    STG["Storage Account (demo)"]
+  end
+
+  subgraph DBW2["Databricks Workspace"]
+    CL["Cluster (demo-cluster)"]
+    NB["Notebook: /Workspace/Shared/demo/hello"]
+    JOB["Databricks Job"]
+    SCOPE["Secret Scope: kv\n(Key-Vault-backed)"]
+  end
+
+  RG --- DBW2
+  TF --> KV
+  TF --> AI
+  TF --> ADF
+  TF --> DBW
+  TF --> STG
+  TF -->|create| JOB
+  TF -->|upload| NB
+  TF -->|create| CL
+  TF -->|create| SCOPE
+  TF -->|Set value| KV
+
+  AI -->|primary_access_key| KV
+  SCOPE --- KV
+
+  JOB -->|runs on| CL
+  NB -->|dbutils.secrets.get('kv','ai-primary-key')| SCOPE
+  NB -->|HTTP POST| AI
+
+  ADF -->|Get Secret\n(AzureKeyVault activity)| KV
+  ADF -->|Web Activity\nHeader: Ocp-Apim-Subscription-Key| AI
