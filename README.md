@@ -12,51 +12,31 @@ LinkedIn: [linkedin.com/in/agnesbosskay](https://linkedin.com/in/agnesbosskay)
 ## 🔷 Architecture Overview
 
 ```mermaid
-flowchart LR
+graph LR
 
-  %% ===== Subgraphs =====
-  subgraph TFBOX["Terraform apply"]
-    TFAPPLY((apply))
-  end
+  %% --- Terraform -> Azure resources ---
+  TF[Terraform apply] --> RG[Resource group]
+  TF --> KV[Key Vault]
+  TF --> AI[Cognitive Services]
+  TF --> ADF[Data Factory]
+  TF --> STG[Storage account]
+  TF --> DBW[Databricks workspace]
 
-  subgraph RG["Resource Group"]
-    KV[Azure Key Vault<br/>(ai-primary-key)]
-    AI[Azure Cognitive Services<br/>(CognitiveAccount)]
-    ADF[Azure Data Factory<br/>(Managed Identity)]
-    DBW[Azure Databricks Workspace (resource)]
-    STG[Storage Account]
-  end
+  %% --- Databricks logical parts (no special chars) ---
+  DBW --- CL[Cluster demo]
+  DBW --- NB[Notebook hello]
+  DBW --- JOB[Databricks job]
+  DBW --- SCOPE[Secret scope kv]
 
-  subgraph DWB["Databricks Workspace (logical)"]
-    CL[Cluster: demo-cluster]
-    NB[Notebook: /Workspace/Shared/demo/hello]
-    JOB[Databricks Job]
-    SCOPE[Secret Scope: kv<br/>(Key-Vault-backed)]
-  end
-
-  %% ===== Provisioning edges by Terraform =====
-  TFAPPLY --> KV
-  TFAPPLY --> AI
-  TFAPPLY --> ADF
-  TFAPPLY --> DBW
-  TFAPPLY --> STG
-  TFAPPLY --> JOB
-  TFAPPLY --> NB
-  TFAPPLY --> CL
-  TFAPPLY --> SCOPE
-
-  %% ===== Relation between Azure resource & Databricks logical workspace =====
-  DBW --- DWB
-
-  %% ===== Secrets wiring =====
-  AI -- "primary_access_key" --> KV
+  %% --- Secrets wiring ---
+  AI --> KV
   SCOPE --- KV
 
-  %% ===== Runtime paths =====
-  JOB -->|runs on| CL
-  NB -->|"dbutils.secrets.get(scope=kv key=ai-primary-key)"| SCOPE
-  NB -->|HTTP POST| AI
+  %% --- Runtime paths ---
+  JOB --> CL
+  NB --> SCOPE
+  NB --> AI
 
-  %% ===== ADF path (demo vs. clean) =====
-  ADF -->|"Get Secret (AzureKeyVault activity)"| KV
-  ADF -->|"Web Activity (header → Ocp-Apim-Subscription-Key)"| AI
+  %% --- ADF option: KV then AI ---
+  ADF --> KV
+  ADF --> AI
