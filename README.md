@@ -24,7 +24,7 @@ The solution showcases:
   - **Cluster** for execution  
   - **Notebook** using a Key Vault-backed **Secret Scope** to securely retrieve the API key (`dbutils.secrets.get("kv", "ai-primary-key")`), and make a POST request to the Cognitive endpoint.
   - **Job** to run the notebook with parameters.
-- **Azure Storage Account**: Deployed for completeness, not directly used in this demo.
+- **Azure Storage Account**: Created for future use as the Terraform remote state backend; not referenced elsewhere in the demo.
 
 ---
 
